@@ -1,0 +1,77 @@
+inline fn wookie_pke_decrypt( reg ptr u8[WOOKIE_PKE_BYTES] msg,
+                             reg ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES] ct, 
+                             reg ptr u8[WOOKIE_PKE_SECRETKEYBYTES] sk)-> reg ptr u8[WOOKIE_PKE_BYTES]
+                                                      
+{
+   stack ptr u8[WOOKIE_PKE_BYTES] smsg;
+   stack ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES] sct;
+   stack ptr u8[WOOKIE_PKE_SECRETKEYBYTES] ssk;
+
+   stack u16[WOOKIE_N] u t s v ;
+   reg ptr u16[WOOKIE_N] up tp sp vp;
+
+   smsg=msg;
+   sct=ct;
+   ssk=sk;
+
+   up=u;
+   ct=sct;
+   u=poly_frombytes(up,ct[0:WOOKIE_POLYBYTES]);
+
+   vp=v;
+   ct=sct;
+   v=poly_frombytes(vp,ct[WOOKIE_POLYBYTES:2048]);
+
+
+   sp=s;
+   sk=ssk;
+   s=poly_frombytes(sp,sk);
+
+   tp=t;
+   up=u;
+   sp=s;
+   t=poly_mul(tp,up,sp);
+
+   tp=t;
+   vp=v;
+   t=poly_sub_inplace(vp,tp);
+
+   msg=smsg;
+   tp=t;
+   msg=poly_tomsg(msg,tp);
+   
+   return msg;
+}
+
+export fn jazz_wookie_pke_decrypt(reg u64 msg ct sk)
+{
+   stack u64 sct ssk sv smsg;
+
+   stack u8[WOOKIE_PKE_BYTES] s_msg;
+
+   stack u8[WOOKIE_PKE_CIPHERTEXTBYTES] s_ct;
+   reg ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES] p_ct;
+
+   stack u8[WOOKIE_PKE_SECRETKEYBYTES] s_sk;
+   reg ptr u8[WOOKIE_PKE_SECRETKEYBYTES] p_sk;
+
+   msg=msg;
+   ct=ct;
+   sk=sk;
+ 
+   s_ct=to_stack_array_8_cfb(s_ct,ct);
+   s_sk=to_stack_array_8_csb(s_sk, sk);
+   
+   smsg=msg;
+   sct=ct;
+   ssk=sk;
+  
+   p_ct=s_ct;
+   p_sk=s_sk;
+
+   s_msg=wookie_pke_decrypt(s_msg,p_ct,p_sk);
+
+   msg=smsg;
+ 
+   from_stack_array_8_b(s_msg,msg);
+}

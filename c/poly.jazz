@@ -1,0 +1,355 @@
+
+param int WOOKIE_N=1024;
+param int WOOKIE_LOGQ=16;
+param int WOOKIE_Q=65536;
+param int WOOKIE_K= 8;
+param int WOOKIE_SYMBYTES=32;
+
+param int WOOKIE_PKE_SECRETKEYBYTES=2048;
+param int WOOKIE_PKE_PUBLICKEYBYTES=2080;
+param int WOOKIE_PKE_CIPHERTEXTBYTES=4096;
+param int WOOKIE_PKE_BYTES=128;
+param int WOOKIE_POLYBYTES=2048;
+
+inline
+fn to_stack_array_8_2048(stack u8[2*WOOKIE_N] sr, reg u64 pr) -> stack u8[2*WOOKIE_N]
+{
+   reg u64 i;
+   i=0;
+   while(i<WOOKIE_POLYBYTES)
+   {
+      sr[(int)i]=(u8)[pr+i];
+      i+=1;
+   }
+   return sr;
+}
+
+inline
+fn to_stack_array_16_N(stack u16[WOOKIE_N] sr, reg u64 pr) -> stack u16[WOOKIE_N]
+{
+   reg u64 i;
+   i=0;
+   while(i<WOOKIE_N)
+   {
+      sr[(int)i]=(u16)[pr+i*2];
+      i+=1;
+   }
+   return sr;
+}
+
+inline
+fn to_stack_array_8_N(stack u8[WOOKIE_N] sr, reg u64 pr) -> stack u8[WOOKIE_N]
+{
+   reg u64 i;
+   i=0;
+   while(i<WOOKIE_N)
+   {
+      sr[(int)i]=(u8)[pr+i];
+      i+=1;
+   }
+   return sr;
+}
+
+inline
+fn to_stack_array_16_PB(stack u16[WOOKIE_POLYBYTES] sm, reg u64 pm) -> stack u16[WOOKIE_POLYBYTES] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_POLYBYTES)
+   {
+    sm[(int)i] = (u16)[pm + i*2];
+    i+=1;
+   }
+   return sm;
+}
+inline
+fn to_stack_array_8_PB(stack u8[WOOKIE_POLYBYTES] sm, reg u64 pm) -> stack u8[WOOKIE_POLYBYTES] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_POLYBYTES)
+   {
+    sm[(int)i] = (u8)[pm + i];
+    i+=1;
+   }
+   return sm;
+}
+
+inline
+fn to_stack_array_8_Nby8(stack u8[WOOKIE_N/8] sm, reg u64 pm) -> stack u8[WOOKIE_N/8] 
+{
+   reg u64 i;
+   i=0;
+   
+   reg u32 eight ite;
+   eight=8;
+   ite=WOOKIE_N;
+   ite=ite/eight;
+
+   while(i<ite)
+   {
+      sm[(int)i]=(u8)[pm + i];
+      i+=1;
+   }
+   return sm;
+}
+inline 
+fn to_stack_array_8_SYM(stack u8[32] sm, reg u64 pr)->stack u8[32]
+{
+   reg u64 i;
+   i = 0;
+
+   while(i<WOOKIE_SYMBYTES)
+   {
+      sm[(int)i]=(u8)[pr+i];
+      i+=1;
+   }
+   return sm;
+}
+inline
+fn to_stack_array_8_cpb(stack u8[WOOKIE_PKE_PUBLICKEYBYTES] sm, reg u64 pm) -> stack u8[WOOKIE_PKE_PUBLICKEYBYTES] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_PUBLICKEYBYTES)
+   {
+      sm[(int)i]=(u8)[pm + i];
+      i+=1;
+   }
+   return sm;
+}
+inline
+fn to_stack_array_16_2N(stack u16[2*WOOKIE_N] sm, reg u64 pm) -> stack u16[2*WOOKIE_N] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<2*WOOKIE_N)
+   {
+    sm[(int)i] = (u16)[pm + i*2];
+    i+=1;
+   }
+   return sm;
+}
+inline
+fn to_stack_array_16_SYMplus1(stack u16[WOOKIE_SYMBYTES+1] sm, reg u64 pm) -> stack u16[WOOKIE_SYMBYTES+1] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_SYMBYTES+1)
+   {
+    sm[(int)i] = (u16)[pm + i*2];
+    i+=1;
+   }
+   return sm;
+}
+
+inline
+fn to_stack_array_8_csb(stack u8[WOOKIE_PKE_SECRETKEYBYTES] sm, reg u64 pm) -> stack u8[WOOKIE_PKE_SECRETKEYBYTES] 
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_SECRETKEYBYTES)
+   {
+      sm[(int)i]=(u8)[pm + i];
+      i+=1;
+   }
+   return sm;
+}
+
+inline 
+fn to_stack_array_8_cfb(stack u8[WOOKIE_PKE_CIPHERTEXTBYTES] sm, reg u64 pm)->stack u8[WOOKIE_PKE_CIPHERTEXTBYTES]
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_CIPHERTEXTBYTES)
+   {
+      sm[(int)i]=(u8)[pm + i];
+      i+=1;
+   }
+   return sm;
+}
+
+inline 
+fn to_stack_array_8_b(stack u8[WOOKIE_PKE_BYTES] sm, reg u64 pm)->stack u8[WOOKIE_PKE_BYTES]
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_BYTES)
+   {
+      sm[(int)i]=(u8)[pm + i];
+      i+=1;
+   }
+   return sm;
+}
+
+
+/*inline 
+fn from_stack_array_16_N(stack u16[WOOKIE_N] sr, reg u64 pr)->reg u64
+{
+  reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_N)
+  {
+     (u16)[pr+i*2]=sr[(int)i];
+     i+=1;
+  }
+  return pr;
+}*/
+
+inline 
+fn from_stack_array_8_PB(stack u8[WOOKIE_POLYBYTES] sr, reg u64 pr)->reg u64
+{
+  reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_POLYBYTES)
+  {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+  }
+  return pr;
+}
+
+inline 
+fn from_stack_array_8_Nby8(stack u8[WOOKIE_N/8] sr, reg u64 pr)->reg u64
+{
+   reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_N/8)
+  {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+  }
+  return pr;
+}
+
+inline 
+fn from_stack_array_16_N(stack u16[WOOKIE_N] sr, reg u64 pr)
+{
+   reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_N)
+  {
+     (u16)[pr+i*2]=sr[(int)i];
+     i+=1;
+  }
+}
+
+inline 
+fn from_stack_array_16_2N(stack u16[2*WOOKIE_N] sr, reg u64 pr)
+{
+   reg u64 i;
+   i=0;
+
+   while(i<2*WOOKIE_N)
+   {
+      (u16)[pr+i*2]=sr[(int)i];
+      i+=1;
+   }
+
+   //return pr;
+}
+inline 
+fn from_stack_array_16_SYMplus1(stack u16[WOOKIE_SYMBYTES+1] sr, reg u64 pr)->reg u64
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_SYMBYTES+1)
+   {
+      (u16)[pr+i*2]=sr[(int)i];
+      i+=1;
+   }
+
+   return pr;
+}
+inline 
+fn from_stack_array_8_cpb(stack u8[WOOKIE_PKE_PUBLICKEYBYTES] sr, reg u64 pr)
+{
+   reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_PKE_PUBLICKEYBYTES)
+  {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+  }
+}
+
+inline 
+fn from_stack_array_8_csb(stack u8[WOOKIE_PKE_SECRETKEYBYTES] sr, reg u64 pr)
+{
+   reg u64 i;
+  i=0;
+
+  while(i<WOOKIE_PKE_SECRETKEYBYTES)
+  {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+  }
+}
+
+inline 
+fn from_stack_array_8_cfb(stack u8[WOOKIE_PKE_CIPHERTEXTBYTES] sr, reg u64 pr)
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_CIPHERTEXTBYTES)
+   {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+   }
+}
+
+inline fn from_stack_array_8_b(stack u8[WOOKIE_PKE_BYTES] sr, reg u64 pr)
+{
+   reg u64 i;
+   i=0;
+   reg u8 v;
+
+   while(i<WOOKIE_PKE_BYTES)
+   {
+      v=sr[(int)i];
+     (u8)[pr+i]=v;
+     i+=1;
+   }
+}
+
+inline fn from_stack_array_8_2048(stack u8[2*WOOKIE_N] sr, reg u64 pr)
+{
+   reg u64 i;
+   i=0;
+
+   while(i<WOOKIE_PKE_BYTES)
+   {
+     (u8)[pr+i]=sr[(int)i];
+     i+=1;
+   }
+}
+
+require "jazz_poly_uniform.jazz"
+require "xof.jazz"
+require "jazz_poly_getnoise.jazz"
+require "jazz_poly_add.jazz"
+require "jazz_poly_sub.jazz"
+require "jazz_poly_mul.jazz"
+require "jazz_poly_tobytes.jazz"
+require "jazz_poly_frombytes.jazz"
+require "jazz_poly_frommsg.jazz"
+require "jazz_poly_tomsg.jazz"
+require "jazz_wookie_pke_keypair.jazz"
+require "jazz_wookie_pke_encrypt.jazz"
+require "jazz_wookie_pke_decrypt.jazz"
+

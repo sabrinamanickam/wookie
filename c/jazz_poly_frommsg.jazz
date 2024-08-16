@@ -1,0 +1,61 @@
+
+inline fn poly_frommsg(reg mut ptr u16[WOOKIE_N] r_coeffs, reg ptr u8[WOOKIE_N/8] m)->reg ptr u16[WOOKIE_N]
+{
+   reg u64 two i j index;
+   reg u16 term1 term2 res two;
+   two=2;
+
+   term1=32768;
+
+    i=0;
+    while(i<WOOKIE_N/8)
+    {
+     j=0;
+    while(j<8)
+    {
+        index=8*i;
+        index+=j;
+
+        //(m[i]>>j)
+       term2=(16u)m[(int)i];
+       term2>>=j & 31;
+       term2&= 1;
+
+        //r->coeffs[i*8+j] = (WOOKIE_Q/2)*((m[i]>>j)&1);
+        res=term1;
+        res=res*term2;
+
+        r_coeffs[(int)index]=res;
+        j+=1;
+
+    }
+    i+=1;
+   }
+   return r_coeffs;
+}
+
+
+
+export fn jazz_poly_frommsg(reg u64 pr pm)
+{
+    inline int i;
+
+    stack u16[WOOKIE_N] sr;
+    reg ptr u16[WOOKIE_N] res;
+
+    stack u8[WOOKIE_N/8] sm;
+    reg ptr u8[WOOKIE_N/8]m;
+
+    sr=to_stack_array_16_N(sr, pr);
+
+    sm=to_stack_array_8_Nby8(sm, pm);
+
+    res=sr;
+    m=sm;
+
+    res=poly_frommsg(res, m);
+
+    sr=res;
+
+    from_stack_array_16_N(sr,pr);
+}

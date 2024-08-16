@@ -1,0 +1,19 @@
+inline fn poly_uniform_1024_32(reg ptr u16[WOOKIE_N] a_coeffs, reg ptr u8[WOOKIE_SYMBYTES] seed)->reg ptr u16[WOOKIE_N]
+{
+  inline int i;
+  for i=0 to 1024
+  {
+    a_coeffs[i]=0;
+  }
+  return a_coeffs;
+}
+
+inline fn poly_uniform_1024_2048(reg ptr u16[WOOKIE_N] a_coeffs, reg ptr u8[WOOKIE_PKE_PUBLICKEYBYTES] seed)->reg ptr u16[WOOKIE_N]
+{
+  inline int i;
+  for i=0 to 1024
+  {
+    a_coeffs[i]=0;
+  }
+  return a_coeffs;
+}

@@ -1,0 +1,114 @@
+require "shake256.jinc"
+
+inline 
+fn wookie_pke_encrypt(reg ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES] ct, reg ptr u8[WOOKIE_PKE_BYTES] msg, reg ptr u8[WOOKIE_PKE_PUBLICKEYBYTES] pk, reg ptr u8[WOOKIE_SYMBYTES] coins)-> reg ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES]
+{
+    stack ptr u8[WOOKIE_PKE_CIPHERTEXTBYTES] sct;
+    stack ptr u8[WOOKIE_PKE_BYTES] smsg;
+    stack ptr u8[WOOKIE_PKE_PUBLICKEYBYTES] spk;
+    stack ptr u8[WOOKIE_SYMBYTES] scoins;
+    stack ptr u16[WOOKIE_N] sa;
+    stack ptr u16[WOOKIE_N] svp;
+
+    stack u16[WOOKIE_N] a b k sp er err u v;
+    reg ptr u16[WOOKIE_N] ap bp kp spp erp errp up vp;
+
+    stack u8[WOOKIE_SYMBYTES] seed;
+    reg ptr u8[WOOKIE_SYMBYTES] seedp;
+
+    reg u8 tmp;
+    inline int i;
+ 
+    sct=ct;
+    smsg=msg;
+    spk=pk;
+    scoins=coins;
+    sa=a;
+    svp=vp;
+
+    bp=b;
+    pk=spk;
+    b=poly_frombytes(bp,pk[WOOKIE_SYMBYTES:WOOKIE_POLYBYTES]);
+    
+    ap=a;
+    pk=spk;
+    a=_shake256_32(ap, pk[0:32]);
+
+    spp=sp;
+    coins=scoins;
+    tmp=0;
+    sp=poly_getnoise(spp,coins,tmp);
+
+    erp=er;
+    coins=scoins;
+    tmp=1;
+    er=poly_getnoise(erp,coins,tmp);
+
+    errp=err;
+    coins=scoins;
+    tmp=2;
+    err=poly_getnoise(errp,coins,tmp);
+
+    kp=k;
+    msg=smsg;
+    k=poly_frommsg(kp,msg);
+
+    up=u;
+    ap=a;
+    spp=sp;
+    u=poly_mul(up,ap,spp);
+    
+    up=u;
+    erp=er;
+    u=poly_add_inplace(up,erp);
+
+    vp=v;
+    bp=b;
+    spp=sp;
+    v=poly_mul(vp,bp,spp);
+    
+    vp=v;
+    errp=err;
+    v=poly_add_inplace(vp,errp);
+    
+    vp=v;
+    kp=k;
+    vp=poly_add_inplace(vp,kp);
+    
+    ct=sct;
+    ct[0:WOOKIE_POLYBYTES]=poly_tobytes(ct[0:WOOKIE_POLYBYTES],up);
+    ct[WOOKIE_POLYBYTES:WOOKIE_POLYBYTES]=poly_tobytes(ct[WOOKIE_POLYBYTES:WOOKIE_POLYBYTES],vp);
+
+    return ct;
+}
+ 
+export fn jazz_wookie_pke_encrypt(reg u64 ct msg pk coins)
+{
+    stack u64 sct smsg spk scoins;
+
+    stack u8[WOOKIE_PKE_CIPHERTEXTBYTES] s_ct;
+    stack u8[WOOKIE_PKE_BYTES] s_msg;
+    stack u8[WOOKIE_PKE_PUBLICKEYBYTES] s_pk;
+    stack u8[WOOKIE_SYMBYTES] s_coins;
+
+    ct=ct;
+    msg=msg;
+    pk=pk;
+    coins=coins;
+
+    s_msg=to_stack_array_8_b(s_msg,msg);
+    s_pk=to_stack_array_8_cpb(s_pk, pk);
+    s_coins=to_stack_array_8_SYM(s_coins,coins);
+
+    sct=ct;
+    smsg=msg;
+    spk=pk;
+    scoins=coins;
+
+    s_ct=wookie_pke_encrypt(s_ct,s_msg,s_pk,s_coins);
+
+    ct=sct;
+
+    from_stack_array_8_cfb(s_ct, ct);
+}
+

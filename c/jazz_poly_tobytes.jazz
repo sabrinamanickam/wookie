@@ -1,0 +1,49 @@
+
+inline fn poly_tobytes (reg ptr u8[2048] r,reg ptr u16[WOOKIE_N] a_coeffs)->reg ptr u8[WOOKIE_POLYBYTES]
+{
+    reg u64 i index;
+    reg u16 hi lo; 
+
+    i=0;
+    index=0;
+    while(i<WOOKIE_N)
+    {
+
+        hi=a_coeffs[(int)i];
+        lo=hi;
+
+        lo&=0xff;
+        hi >>=8;
+
+        r[(int)index]= (8u)lo;
+        index+=1;
+        r[(int)index]= (8u)hi;
+        index+=1;
+        i+=1;
+    }
+    return r;
+    
+}
+export fn jazz_poly_tobytes(reg u64 pr pa)
+{
+    reg u64 i;
+
+    stack u8[WOOKIE_POLYBYTES] sr;
+    reg ptr u8[WOOKIE_POLYBYTES] r;
+
+    stack u16[WOOKIE_N] sa ;
+    reg ptr u16[WOOKIE_N] a;
+
+    sr=to_stack_array_8_PB(sr,pr);
+    sa=to_stack_array_16_N(sa,pa);
+
+    r=sr;
+    a=sa;
+
+    r=poly_tobytes(r, a);
+
+    sr=r;
+    i=0;
+
+    pr=from_stack_array_8_PB(sr,pr);
+}

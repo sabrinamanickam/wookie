@@ -1,0 +1,66 @@
+
+
+inline fn poly_mul(reg ptr u16[WOOKIE_N] r_coeffs a_coeffs b_coeffs)->reg ptr u16[WOOKIE_N]
+{
+    stack u16[2*WOOKIE_N] t;
+    reg u16 temp, temp1,temp_mul,mul, temp_sub, sub;
+    reg u64 i,j,num1, num2, num;
+    temp=0;
+
+    i=0;
+
+    while(i<2*WOOKIE_N)
+    { 
+     t[(int)i] = temp;
+     i+=1;
+    }
+
+    i=0;
+    
+    while(i<WOOKIE_N)
+    {
+      j=0;
+        while(j<WOOKIE_N)
+        {
+            temp=a_coeffs[(int)i];
+            temp_mul=b_coeffs[(int)j];
+            temp_mul*=temp;
+            num1=i;
+            num=j;
+            num+=num1;
+            t[(int)(num)]+=temp_mul;
+            j+=1;
+        }
+        i+=1;
+    }
+    i=0;
+    while(i<WOOKIE_N)
+    {
+        temp_sub=t[(int)i];
+        temp1=t[(int)(i+WOOKIE_N)];
+        temp_sub-=temp1;
+        r_coeffs[(int)i]=temp_sub; 
+        i+=1; 
+    }     
+    return r_coeffs;
+}
+export fn jazz_poly_mul(reg u64 pr pa pb)
+{
+   inline int i;
+   stack u16[1024]  sa, sb, sr;
+   reg ptr u16[1024] r, a, b;
+
+   sa=to_stack_array_16_N(sa,pa);
+   sb=to_stack_array_16_N(sb,pb);
+   
+   r=sr;
+   a=sa;
+   b=sb;
+
+   //Saves result of mul in pA
+   r=poly_mul(r, a, b); 
+   
+   sr=r;
+   
+   from_stack_array_16_N(sr,pr);
+}

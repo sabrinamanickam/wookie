@@ -1,0 +1,57 @@
+
+inline fn poly_tomsg( reg mut ptr u8[WOOKIE_N/8] m, reg ptr u16[WOOKIE_N] a_coeffs)->reg ptr u8[WOOKIE_N/8]
+{
+   reg u64 i j index zero shf_j;
+   reg u32 temp shf t;
+   temp=16384;
+
+    i=0;
+    zero=0;
+    while(i<WOOKIE_N/8)
+    {
+        m[(int)i]=zero;
+        j=0;
+        while(j<8)
+        {
+            shf=15;
+            index=8*i;
+            index+=j;
+            shf_j=j;
+
+            t=(32u)a_coeffs[(int)index];
+            t+=temp;
+            t >>=shf & 31;
+            t&=1;
+
+            shf=j;
+            t <<=shf & 31;
+            m[(int)i] |= (8u)t;
+            j+=1;
+        }
+        i+=1;
+    }
+    return m;
+}
+
+export fn jazz_poly_tomsg(reg u64 pm pa)
+{
+    inline int i;
+    stack u8[WOOKIE_N/8] sm;
+    reg ptr u8[WOOKIE_N/8]m;
+
+    stack u16[WOOKIE_N] sa;
+    reg ptr u16[WOOKIE_N] a;
+
+    sm=to_stack_array_8_Nby8(sm,pm);
+    m=sm;
+
+    sa=to_stack_array_16_N(sa,pa);
+    a=sa;
+  
+
+    m=poly_tomsg(m, a);
+    sm=m;
+
+    pm=from_stack_array_8_Nby8(sm,pm);
+
+}

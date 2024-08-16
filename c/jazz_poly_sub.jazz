@@ -1,0 +1,55 @@
+
+
+inline fn poly_sub(reg ptr u16[WOOKIE_N] r_coeffs a_coeffs b_coeffs)->reg ptr u16[WOOKIE_N]
+{
+   reg u64 i;
+   reg u16 temp;
+   
+   i=0;
+   while(i<WOOKIE_N)
+   {
+      temp=a_coeffs[(int)i];
+      temp-=b_coeffs[(int)i];
+      r_coeffs[(int)i]=temp;  
+      i+=1;
+   }
+   return r_coeffs;
+}
+
+//computes b=a-b; return b
+inline fn poly_sub_inplace(reg ptr u16[WOOKIE_N] a_coeffs b_coeffs)->reg ptr u16[WOOKIE_N] 
+{
+    reg u64 i;
+    reg u16 temp;
+
+    i=0;
+    while(i<WOOKIE_N)
+    {
+        temp=a_coeffs[(int)i];
+        temp-=b_coeffs[(int)i];
+        b_coeffs[(int)i]=temp;
+        i+=1;
+    }
+
+    return b_coeffs;
+}
+export fn jazz_poly_sub(reg u64 pr pa pb)
+{
+   inline int i;
+   stack u16[WOOKIE_N]  sa, sb, sr, res1, res2;
+   reg ptr u16[WOOKIE_N] p1, r, a, b;
+
+   sa= to_stack_array_16_N(sa, pa);
+   sb= to_stack_array_16_N(sb, pb);
+   
+   r=sr;
+   a=sa;
+   b=sb;
+
+   //Saves result of add in pA
+   r=poly_sub(r, a, b); 
+   
+   sr=r;
+   
+   from_stack_array_16_N(sr,pr);
+ }

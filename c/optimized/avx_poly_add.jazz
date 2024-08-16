@@ -1,0 +1,9 @@
+fn _poly_add(reg ptr u16[WOOKIE_N] r_coeffs a_coeffs b_coeffs)->reg ptr u16[WOOKIE_N]
+{
+    inline int i;
+    reg u256 a;
+    reg u256 b;
+    reg u256 r;
+
+    for 0
+}

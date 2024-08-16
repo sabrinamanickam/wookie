@@ -1,0 +1,96 @@
+
+inline fn wookie_pke_keypair(reg ptr u8[WOOKIE_PKE_PUBLICKEYBYTES] pk, reg ptr u8[WOOKIE_PKE_SECRETKEYBYTES] sk)-> reg ptr u8[WOOKIE_PKE_PUBLICKEYBYTES], reg ptr u8[WOOKIE_PKE_SECRETKEYBYTES]
+{
+    stack u8[WOOKIE_PKE_PUBLICKEYBYTES] spk;
+    stack u8[WOOKIE_PKE_SECRETKEYBYTES] ssk;
+
+    stack u16[WOOKIE_N] a s e b;
+    reg ptr u16[WOOKIE_N] ap sp ep bp temp;
+
+    stack u8[WOOKIE_SYMBYTES] seed;
+    stack u8[WOOKIE_SYMBYTES] coins;
+    reg ptr u8[WOOKIE_SYMBYTES] seedp, coinsp;
+    
+    reg u8 seed1 temp;
+
+    inline int i;
+
+    spk=pk;
+    ssk=sk;
+
+    seedp=seed;
+    seed=#randombytes(seedp); //random bytes can be called once using a bigger array and split into 2
+
+    coinsp=coins; //move ADDcoins into RSI
+    coins=#randombytes(coinsp);
+    
+    seedp=seed;
+    coinsp=coins;
+
+    ap=a;
+    seedp=seed;
+    a=_shake256_32(ap,seedp);
+
+    sp=s;
+    coinsp=coins;
+    seed1=0;
+    s=poly_getnoise(sp,coinsp,seed1);
+    
+    ep=e;
+    coinsp=coins;
+    seed1=1;
+    e=poly_getnoise(ep,coinsp,seed1);
+
+    bp=b;
+    ap=a;
+    sp=s;
+    bp=poly_mul(bp,ap,sp);
+
+    ep=e;
+    bp=poly_add_inplace(bp,ep);
+
+    sk=ssk;
+    sk= poly_tobytes(sk,sp); 
+
+    pk=spk;
+    //memcpy
+    for i=0 to WOOKIE_SYMBYTES
+    { 
+        temp=seed[i];
+        pk[i]=temp;
+    }
+    pk[WOOKIE_SYMBYTES:WOOKIE_POLYBYTES]=poly_tobytes(pk[WOOKIE_SYMBYTES:WOOKIE_POLYBYTES],bp);
+
+    return pk,sk;
+
+}
+export fn jazz_wookie_pke_keypair(reg u64 pk sk)
+{
+    stack u64 spk ssk;
+
+    stack u8[WOOKIE_PKE_PUBLICKEYBYTES] s_pk;
+    reg ptr u8[WOOKIE_PKE_PUBLICKEYBYTES] p_pk;
+
+    stack u8[WOOKIE_PKE_SECRETKEYBYTES] s_sk;
+    reg ptr u8[WOOKIE_PKE_SECRETKEYBYTES] p_sk;
+
+    pk=pk;
+    sk=sk;
+
+    s_pk=to_stack_array_8_cpb(s_pk,pk);
+    s_sk=to_stack_array_8_csb(s_sk,sk);
+
+    spk=pk;
+    ssk=sk;
+
+    p_pk=s_pk;
+    p_sk=s_sk;
+    
+    s_pk,s_sk=wookie_pke_keypair(p_pk,p_sk);
+
+    pk=spk;
+    sk=ssk;
+
+    from_stack_array_8_cpb(s_pk,pk);
+    from_stack_array_8_csb(s_sk,sk);
+}
